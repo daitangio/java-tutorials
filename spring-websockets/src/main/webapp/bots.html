@@ -55,7 +55,7 @@
 	            var response = document.getElementById('response');
 	            var p = document.createElement('p');
 	            p.style.wordWrap = 'break-word';
-	            p.appendChild(document.createTextNode(messageOutput.from + ": " + messageOutput.text + " (" + messageOutput.time + ")"));
+	            p.appendChild(document.createTextNode(" [" + messageOutput.time + "] "+messageOutput.from + ": " + messageOutput.text ));
 	            response.appendChild(p);
 	        }
 
@@ -80,7 +80,7 @@
 		    <div id="conversationDiv">
 		        <input type="text" id="text" placeholder="Write a message..."/>
 		        <button id="sendMessage" onclick="sendMessage();">Send</button>
-		        <p id="response"></p>
+		        <tt id="response"></tt>
 		    </div>
 		</div>
 

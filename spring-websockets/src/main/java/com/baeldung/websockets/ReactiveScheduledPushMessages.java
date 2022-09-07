@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 
-@Service
+// @Service
 public class ReactiveScheduledPushMessages implements InitializingBean {
 
     private final SimpMessagingTemplate simpMessagingTemplate;

@@ -1,0 +1,4 @@
+logging:
+  level:    
+    # GG DEBUG here for nice debug
+    ROOT: INFO
