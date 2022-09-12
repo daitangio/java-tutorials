@@ -37,5 +37,10 @@ public class ConnectedUserManager {
             return null;
         }
     }
+
+    public void deregisterUser(StompPrincipal user) {
+        connectedUser.remove(user.getName());
+        log.info("Removed User::"+user.getName()+" Total Users: "+connectedUser.size());
+    }
     
 }

@@ -13,4 +13,6 @@ class StompPrincipal implements Principal {
     public String getName() {
         return name;
     }
+
+    public String toString(){ return "Principal-"+name; }
 }
