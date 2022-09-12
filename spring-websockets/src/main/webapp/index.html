@@ -1,7 +1,8 @@
 <html>
 	<head>
-	    <title>Chat WebSocket</title>
+	    <title>WebSocket Notification</title>
 	    
+		This example is a notification system on which every user get different messages from the server.
 	    <script src="resources/js/sockjs-0.3.4.js"></script>
 	    <script src="resources/js/stomp.js"></script>
 	    
@@ -19,18 +20,30 @@
 
 	        function connect() {
 
-	            var socket = new SockJS('/chatwithbots');
-	            stompClient = Stomp.over(socket);
+				var socket = new SockJS('/greeting');
+				stompClient = Stomp.over(socket);
+				
+				var login = document.getElementById('from').value;
+				var pass="trustn00ne";
+				// GG client.connect(login, passcode, connectCallback, errorCallback);
+				// send login and passcode headers
+				stompClient.connect(login,pass, function(frame) {
 
-	            stompClient.connect({}, function(frame) {
-
-	            	setConnected(true);
-	                console.log('Connected: ' + frame);
-	                stompClient.subscribe('/topic/pushmessages', function(messageOutput) {
-
-	                    showMessageOutput(JSON.parse(messageOutput.body));
-	                });
-	            });
+					setConnected(true);
+					console.log('Connected: ' + frame);					
+					stompClient.subscribe("/user/queue/errors", function(message) {
+						showMessageOutput("Error " + message.body);
+					});
+			
+					// Like /topic/pushmessages but for one-to-one
+					stompClient.subscribe("/user/queue/reply", function(messageOutput) {
+						// console.log("Got Reply! :"+messageOutput+":");
+						showMessageOutput(JSON.parse(messageOutput.body));
+					});
+	
+				}, function(error) {
+					showMessageOutput("STOMP error " + error);
+				});
 	        }
 
 	        function disconnect() {
@@ -47,7 +60,7 @@
 
 	        	var from = document.getElementById('from').value;
 	            var text = document.getElementById('text').value;
-	            stompClient.send("/app/chatwithbots", {}, JSON.stringify({'from':from, 'text':text}));
+	            stompClient.send("/app/message", {}, JSON.stringify({'from':from, 'text':text}));
 	        }
 
 	        function showMessageOutput(messageOutput) {
