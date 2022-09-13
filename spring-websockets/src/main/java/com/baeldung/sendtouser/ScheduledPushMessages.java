@@ -52,7 +52,7 @@ public class ScheduledPushMessages {
             final String time = new SimpleDateFormat("HH:mm").format(new Date());            
             simpMessagingTemplate.convertAndSendToUser(username, "/queue/reply", 
                     new OutputMessage("Chuck Norris", fact, time));
-
+            
         }    
         
     }
