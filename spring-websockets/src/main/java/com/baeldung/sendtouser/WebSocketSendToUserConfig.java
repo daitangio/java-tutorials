@@ -61,34 +61,35 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
         
     }
 
+    
+    
+
+    /**
+     * GG: Limiting the max connected users using .setHandshakeHandler(new DefaultHandshakeHandler() { ... isValidOrigin
+     * DOES Not work in practice. We see connection happen anyway.
+     * So we relay on Stomp CONNECT 
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         log.info("Registering greeting end-to-end");
-        registry.addEndpoint("/greeting")
-        /* Right way
-        .setHandshakeHandler(new DefaultHandshakeHandler() {
-
-            @Override
-            protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
-                    Map<String, Object> attributes) {
-
-                Principal newPrincipal=new StompPrincipal(UUID.randomUUID().toString());        
-                log.info("Username:{}",newPrincipal);
-                connectedUserManager.registerNewUser(newPrincipal);
-                return newPrincipal;
-            }
-        })
-         */
-        .withSockJS();
+        registry.addEndpoint("/hubc").withSockJS();
     }
 
 
     /***
-     * In a *true* implementation please relay on Spring Security OR on  the determinateUser inside Hanshake handler.
-     * For this PoC we tryst the login header name in the CONNECT header below
+     * On Stomp, the standard way to "authenticate" user seems to relay on login,pass parameters
+     * 
+     * Refer to
+     * https://docs.spring.io/spring-framework/docs/5.3.x/reference/html/web.html#websocket-stomp-authentication
      */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
+
+        registration
+            .taskExecutor()
+            .corePoolSize(2)
+            .maxPoolSize(3);
+
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -97,19 +98,25 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
 
-                    var login=accessor.getNativeHeader("login");                    
-                    log.info("Login {} Passcode {}", accessor.getNativeHeader("login"), accessor.getNativeHeader("passcode"));
-                    // log.info("Message broker task scheduler: {}", messageBrokerTaskScheduler);
+                    // PRE CHECK 
+                    if(connectedUserManager.isMaxReached()) {
+                        log.warn("Max user reached... refusing CONNECT "+ accessor.getLogin());
+                        return null;
+                    }
+
+                    if(!"trustn00ne".equals(accessor.getPasscode())){
+                        log.error("Login failed for {}", accessor.getLogin());
+                        return null;
+                    }
+
+                    var login=accessor.getLogin();                    
+                    log.info("Login {} Passcode {}", login, accessor.getPasscode());
+  
 
                     Principal newPrincipal=new StompPrincipal(login+"$"+UUID.randomUUID().toString());
                     accessor.setUser(newPrincipal);
                     connectedUserManager.registerNewUser(newPrincipal);
-                    
-                    // accessor.setUser
-                    /*
-                    Authentication user = ... ; // access authentication header(s)
-                    accessor.setUser(user);
-                    */
+  
                 }else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
                     log.info("Disconnecting... {}", message);
                     // .get("simpHeartbeat")
@@ -120,6 +127,18 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
                 }
                 return message;
             }
-        });
+        });        
     }
+
+    
+    @Override
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        registration
+            .taskExecutor()
+            .corePoolSize(1)
+            .maxPoolSize(1);
+        
+    }
+    
+
 }

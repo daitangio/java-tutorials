@@ -11,6 +11,8 @@ import java.util.*;
 @Service
 @Slf4j
 public class ConnectedUserManager {
+    public final static int MAX_USER=2;
+
     private List<String> connectedUser= new ArrayList<>();
 
 
@@ -21,7 +23,10 @@ public class ConnectedUserManager {
 
     public List<String> getConnectedUsers(){
         List<String> l= new ArrayList<>();
-        l.addAll(connectedUser);
+
+        synchronized (connectedUser){
+            l.addAll(connectedUser);
+        }
         return l;
     }
 
@@ -41,6 +46,14 @@ public class ConnectedUserManager {
     public synchronized void deregisterUser(StompPrincipal user) {
         connectedUser.remove(user.getName());
         log.info("Removed User::"+user.getName()+" Total Users: "+connectedUser.size());
+    }
+
+    public synchronized boolean isMaxReached() {
+        return connectedUser.size() >= MAX_USER;
+    }
+
+    public int size() {
+        return connectedUser.size();
     }
     
 }
