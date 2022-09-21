@@ -62,18 +62,19 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
     }
 
     
-    
-
     /**
      * GG: Limiting the max connected users using .setHandshakeHandler(new DefaultHandshakeHandler() { ... isValidOrigin
      * DOES Not work in practice. We see connection happen anyway.
-     * So we relay on Stomp CONNECT 
+     * So we relay on Stomp CONNECT  (see below)
+     * 
+     * Also this implementation does not use .withSockJS() and create a pure websocket without fallbacks
+     * Refer to https://stomp-js.github.io/guide/stompjs/rx-stomp/ng2-stompjs/using-stomp-with-sockjs.html
+     * 
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         log.info("Registering greeting end-to-end");
-        // withSockJS is NEEDED to expose websocket via http
-        registry.addEndpoint("/hubc").withSockJS();
+        registry.addEndpoint("/hubc") ;
     }
 
 
@@ -110,7 +111,7 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
                         return null;
                     }
 
-                    var login=accessor.getLogin();                    
+                    var login=accessor.getLogin();
                     log.info("Login {} Passcode {}", login, accessor.getPasscode());
   
 

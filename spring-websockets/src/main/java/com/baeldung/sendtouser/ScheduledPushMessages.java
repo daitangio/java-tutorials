@@ -36,6 +36,22 @@ public class ScheduledPushMessages {
         faker = new Faker();
         this.log.info("Chuck Norris Ready");
     }
+
+    private Set<String> wellcomed_users= new HashSet<>();
+
+    @Scheduled(fixedRate=5, timeUnit=SECONDS)
+    public void sayWellcome(){
+        for(String user: connectedUserManager.getConnectedUsers()){
+            if( !wellcomed_users.contains(user)){
+                final String time = new SimpleDateFormat("HH:mm").format(new Date()); 
+                simpMessagingTemplate.convertAndSendToUser(user, "/queue/reply", 
+                    new OutputMessage("System","Wellcome (back) user "+ user.split("$")[0] + " Your reconnect API Works",time));    
+                wellcomed_users.add(user);                
+            }
+        }
+
+    }
+
     
     boolean limit_already_reached=false;
     @Scheduled(fixedRate = 2, timeUnit = SECONDS)

@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 @Slf4j
 public class ConnectedUserManager {
-    public final static int MAX_USER=2;
+    public final static int MAX_USER=3;
 
     private List<String> connectedUser= new ArrayList<>();
 

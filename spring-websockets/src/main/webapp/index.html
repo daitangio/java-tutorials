@@ -4,8 +4,7 @@
 	    
 		This example is a notification system on which every user get different messages from the server.
 		This version used shiny new stomp v6 and sockjs
-
-	    <script src="resources/js/sockjs-0.3.4.js"></script>
+	    
 	    <script src="resources/js/stomp-6.1.2.umd.js"></script>
 	    
 	    <script type="text/javascript">
@@ -17,21 +16,23 @@
 	            document.getElementById('connect').disabled = connected;
 	            document.getElementById('disconnect').disabled = !connected;
 	            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
-	            document.getElementById('response').innerHTML = '';
+	            // document.getElementById('response').innerHTML = '';
 	        }
 
 	        function connect() {
 				/* Refer to https://stomp-js.github.io/guide/stompjs/using-stompjs-v5.html
-				*/
+				 * and to https://stomp-js.github.io/guide/stompjs/rx-stomp/ng2-stompjs/using-stomp-with-sockjs.html
+				 */
 				var stompClient ;
 				var login = document.getElementById('from').value;
 				var pass="trustn00ne";
 				
 				/* URL protocol conventions are different for WebSockets (ws:/wss:) and SockJS (http: or https:).
-				 * 
-				 */
-				
-				var stompClient = new StompJs.Client({					
+				 * 				 
+				 */				
+				var stompClient = new StompJs.Client({
+					// !! If using withSockJS use "ws://localhost:8080/hubc/websocket"
+					brokerURL: "ws://localhost:8080/hubc",
 					connectHeaders: {
 					  login: login,
 					  passcode: pass,
@@ -42,10 +43,8 @@
 					reconnectDelay: 5000,
 					heartbeatIncoming: 4000,
 					heartbeatOutgoing: 4000,
-				});				
-				stompClient.webSocketFactory = function(){
-					return new SockJS('/hubc');
-				}
+				});
+
 
 				stompClient.onConnect= function(frame) {
 
