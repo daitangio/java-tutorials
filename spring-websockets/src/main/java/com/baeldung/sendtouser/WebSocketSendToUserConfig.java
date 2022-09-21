@@ -72,6 +72,7 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         log.info("Registering greeting end-to-end");
+        // withSockJS is NEEDED to expose websocket via http
         registry.addEndpoint("/hubc").withSockJS();
     }
 

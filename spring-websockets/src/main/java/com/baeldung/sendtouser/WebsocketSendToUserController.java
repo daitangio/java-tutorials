@@ -34,7 +34,7 @@ public class WebsocketSendToUserController {
     public OutputMessage processMessageFromClient(@Payload String message, Principal principal) throws Exception {
         try{
             log.info("User {} Sent {}",principal,message);
-            String r= "you said:'"+gson.fromJson(message, Map.class).get("text").toString()+"'";
+            String r= principal.getName()+" just said:'"+gson.fromJson(message, Map.class).get("text").toString()+"'";
             final String time = new SimpleDateFormat("HH:mm").format(new Date());
             OutputMessage o= new OutputMessage("Spring", r, time);
             log.info("Sending reply:{}",r);        
