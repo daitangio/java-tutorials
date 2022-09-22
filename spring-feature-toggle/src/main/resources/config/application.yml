@@ -1,0 +1,9 @@
+logging:
+  level:    
+    # GG DEBUG here for nice debug
+    ROOT: INFO
+    org.apache.coyote.http11: INFO
+    org.apache.tomcat.util.net.NioEndpoint: INFO
+application:
+  # Accepted value: 0,1,2 to select the proper hot fix
+  hotfix: 0
