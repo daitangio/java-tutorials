@@ -17,6 +17,7 @@
 	            document.getElementById('disconnect').disabled = !connected;
 	            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
 	            // document.getElementById('response').innerHTML = '';
+				showMessageOutput({ text:"(RE)CONNECTED", from:"client-html", time: new Date()} );
 	        }
 
 	        function connect() {
@@ -100,7 +101,7 @@
 	    
 	</head>
 	
-	<body onload="disconnect()">
+	<body >
 
 		<div>
 		
