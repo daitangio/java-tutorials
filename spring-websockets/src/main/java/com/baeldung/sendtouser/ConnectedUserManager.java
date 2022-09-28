@@ -11,14 +11,13 @@ import java.util.*;
 @Service
 @Slf4j
 public class ConnectedUserManager {
-    public final static int MAX_USER=3;
 
     private List<String> connectedUser= new ArrayList<>();
 
 
     public synchronized void registerNewUser(Principal p){
         connectedUser.add(p.getName());
-        log.info("New User::"+p.getName()+" Total Users: "+connectedUser.size());
+        log.info("{}# Total Users. Added User:: {}",connectedUser.size(),p.getName());        
     }
 
     public List<String> getConnectedUsers(){
@@ -45,14 +44,11 @@ public class ConnectedUserManager {
 
     public synchronized void deregisterUser(StompPrincipal user) {
         connectedUser.remove(user.getName());
-        log.info("Removed User::"+user.getName()+" Total Users: "+connectedUser.size());
+        log.info("{}# Total Users. Removed User:: {}",connectedUser.size(),user.getName());
     }
 
-    public synchronized boolean isMaxReached() {
-        return connectedUser.size() >= MAX_USER;
-    }
-
-    public int size() {
+    
+    public synchronized int size() {
         return connectedUser.size();
     }
     

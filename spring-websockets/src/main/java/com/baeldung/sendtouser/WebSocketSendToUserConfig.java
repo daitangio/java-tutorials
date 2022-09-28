@@ -1,6 +1,7 @@
 package com.baeldung.sendtouser;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.server.ServerHttpRequest;
@@ -12,6 +13,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.*;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.web.socket.WebSocketHandler;
@@ -31,6 +33,7 @@ import java.util.*;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -41,6 +44,13 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
     ConnectedUserManager connectedUserManager;
     
     private TaskScheduler messageBrokerTaskScheduler;
+
+    @Value("${application.hub.max_users}")
+    private int max_users;
+    @Value("${application.hub.max_inbound_threads}")
+    private int max_inbound_threads;
+    @Value("${application.hub.max_outbound_threads}")
+    private int max_outbound_threads;
 
     @Autowired
     public void setMessageBrokerTaskScheduler(@Lazy TaskScheduler taskScheduler) {
@@ -89,8 +99,9 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
 
         registration
             .taskExecutor()
-            .corePoolSize(2)
-            .maxPoolSize(3);
+            .queueCapacity(max_users+2)  // At least two more for managing connect requests
+            .corePoolSize(max_inbound_threads)
+            .maxPoolSize(max_inbound_threads);
 
         registration.interceptors(new ChannelInterceptor() {
             @Override
@@ -101,9 +112,10 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
 
                     // PRE CHECK 
-                    if(connectedUserManager.isMaxReached()) {
-                        log.warn("Max user reached... refusing CONNECT "+ accessor.getLogin());
-                        return null;
+                    if(connectedUserManager.size() >=max_users) {
+                        log.warn("?Max user reached... {}  Limit: {}",connectedUserManager.size(), max_users);
+                        //log.warn("Max user reached... refusing CONNECT "+ accessor.getLogin());
+                        //return null;
                     }
 
                     if(!"trustn00ne".equals(accessor.getPasscode())){
@@ -137,8 +149,10 @@ public class WebSocketSendToUserConfig implements WebSocketMessageBrokerConfigur
     public void configureClientOutboundChannel(ChannelRegistration registration) {
         registration
             .taskExecutor()
-            .corePoolSize(1)
-            .maxPoolSize(1);
+            .queueCapacity(max_users+3)  // We have 3 scheduled tasks so we ask 
+                                         //  a bit more queue. Also this value should be greater the inbound
+            .corePoolSize(max_outbound_threads)            
+            .maxPoolSize(max_outbound_threads);
         
     }
     

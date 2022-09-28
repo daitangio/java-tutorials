@@ -103,3 +103,5 @@ spring-boot-modules/spring-boot-properties-3/*.log
 
 # Localstack
 **/.localstack
+
+xw-spring-websockets.code-workspace

@@ -4,3 +4,13 @@ logging:
     ROOT: INFO
     org.apache.coyote.http11: INFO
     org.apache.tomcat.util.net.NioEndpoint: INFO
+server:
+  port: ${WS_SB_DEFAULT_PORT:8081}
+application:
+  hub:
+    # App tune executor queue to guarantee no more than max users in the system
+    max_users: 5
+    # How much thread needed to send and receive messages?
+    # Thread can be increased if needed
+    max_inbound_threads:  1
+    max_outbound_threads: 1
